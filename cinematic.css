@@ -220,7 +220,7 @@
 .mobile-story-nav { position:fixed; z-index:30; left:50%; bottom:24px; display:flex; align-items:center; gap:12px; padding:6px 7px 6px 14px; border:1px solid #e6bf7544; border-radius:999px; background:#101722ed; color:#eee3cb; box-shadow:0 6px 24px #0008; backdrop-filter:blur(12px); transform:translateX(-50%); }
 .mobile-story-nav__progress { min-width:4.5ch; color:#cfc4af; font:700 11px/1 Consolas,'Courier New',monospace; letter-spacing:.08em; text-align:center; }
 .mobile-story-nav button { display:flex; align-items:center; justify-content:center; gap:9px; min-height:44px; border:0; border-radius:999px; padding:0 16px; background:var(--gold); color:#101722; font:750 12px/1 system-ui,sans-serif; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; }
-.mobile-story-nav button[aria-disabled="true"] { opacity:.72; cursor:progress; }
+.mobile-story-nav button[aria-busy="true"] { opacity:.72; cursor:pointer; }
 .mobile-story-nav button:focus-visible { outline:2px solid #fff; outline-offset:3px; }
 .mobile-story-nav button span[aria-hidden] { font-size:16px; }
 @media(max-width:700px) {
