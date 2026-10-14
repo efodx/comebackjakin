@@ -33,21 +33,76 @@
   const mobileNext = mobileNav.querySelector('button');
   const mobileNextLabel = mobileNav.querySelector('.mobile-story-nav__label');
   const mobileNextIcon = mobileNext.querySelector('[aria-hidden="true"]');
+  const nextStepDuration = 1400; // Give each phone scene a deliberate transition.
+  const finaleDuration = 7600; // Play the scroll-driven friendship reveal at a calm pace.
+  let nextScroll = null;
+  function cancelNextScroll(event) {
+    if (!nextScroll) return;
+    if (event && event.type !== 'wheel' && mobileNav.contains(event.target)) return;
+    cancelAnimationFrame(nextScroll.frame);
+    document.documentElement.style.scrollBehavior = nextScroll.scrollBehavior;
+    nextScroll = null;
+    queue();
+  }
+  function animateNextScroll(steps) {
+    cancelNextScroll();
+    const root = document.documentElement;
+    nextScroll = {frame:0, scrollBehavior:root.style.scrollBehavior};
+    const animation = nextScroll;
+    root.style.scrollBehavior = 'auto';
+    queue();
+    function runStep(index) {
+      if (nextScroll !== animation) return;
+      if (index >= steps.length) {
+        root.style.scrollBehavior = animation.scrollBehavior;
+        nextScroll = null;
+        queue();
+        return;
+      }
+      const {top, duration} = steps[index];
+      const start = performance.now();
+      const from = scrollY;
+      function move(now) {
+        if (nextScroll !== animation) return;
+        const progress = clamp((now - start) / duration);
+        window.scrollTo(0, from + (top - from) * ease(progress));
+        if (progress < 1) animation.frame = requestAnimationFrame(move);
+        else runStep(index + 1);
+      }
+      animation.frame = requestAnimationFrame(move);
+    }
+    runStep(0);
+  }
+  ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(type =>
+    addEventListener(type, cancelNextScroll, {passive:true})
+  );
   mobileNext.addEventListener('click', () => {
+    if (nextScroll) return;
     let current = 0;
     rigs.forEach(({scene}, index) => { if (scrollY >= scene.offsetTop) current = index; });
-    const lastScene = rigs[rigs.length - 1].scene;
+    const lastIndex = rigs.length - 1;
+    const lastScene = rigs[lastIndex].scene;
     const finale = clamp((scrollY - lastScene.offsetTop) / Math.max(1, lastScene.offsetHeight - innerHeight));
     const atEnd = reduced.matches || finale >= .92;
     const endOfStory = document.documentElement.scrollHeight - innerHeight;
     let top;
-    if (current < rigs.length - 1) {
+    if (current < lastIndex) {
       const next = current + 1;
       top = next === rigs.length - 1 ? endOfStory : rigs[next].scene.offsetTop;
     } else {
       top = atEnd ? 0 : endOfStory;
     }
-    window.scrollTo({top, behavior:reduced.matches ? 'auto' : 'smooth'});
+    if (reduced.matches || (current === lastIndex && atEnd)) {
+      window.scrollTo({top, behavior:reduced.matches ? 'auto' : 'smooth'});
+      return;
+    }
+    const steps = current === lastIndex - 1
+      ? [
+          {top:lastScene.offsetTop, duration:nextStepDuration},
+          {top:endOfStory, duration:finaleDuration}
+        ]
+      : [{top, duration:current === lastIndex ? Math.max(1200, finaleDuration * (1 - finale)) : nextStepDuration}];
+    animateNextScroll(steps);
   });
   const speakers = {bobo:'Bobo',pipej:'Pipej',miki:'Miki',kevin:'Kevin',unknown:'Jakinov slot',together:'Vsi skupaj'};
   const reunion = document.querySelector('.scene-reunion');
@@ -94,8 +149,11 @@
     const finaleProgress = scene === reunion ? clamp((scrollY - scene.offsetTop) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
     const finaleComplete = reduced.matches || finaleProgress >= .92;
     mobileStep.textContent = String(active + 1).padStart(2, '0') + ' / ' + String(rigs.length).padStart(2, '0');
-    mobileNextLabel.textContent = scene === reunion ? (finaleComplete ? 'Na začetek' : 'Poglej finale') : 'Naprej';
+    const nextBusy = Boolean(nextScroll);
+    mobileNextLabel.textContent = nextBusy ? 'Počakajte' : scene === reunion ? (finaleComplete ? 'Na začetek' : 'Poglej finale') : 'Naprej';
     mobileNextIcon.textContent = scene === reunion && finaleComplete ? '↑' : '↓';
+    mobileNext.setAttribute('aria-busy', String(nextBusy));
+    mobileNext.setAttribute('aria-disabled', String(nextBusy));
     mobileNext.setAttribute('aria-label', mobileNextLabel.textContent + ', prizor ' + (active + 1) + ' od ' + rigs.length);
     const canCut = active < rigs.length - 1 && !quiet;
     const outgoing = canCut ? 1 - ease((travel - .60) / .18) : 1;

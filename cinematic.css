@@ -176,8 +176,8 @@
 @media(max-width:700px) {
  .story-page.cinematic-story .cast { gap:1%; }.gaming-chair { height:19vh; width:95%; border-width:2px; }.gaming-desk { height:75px; }.monitor { left:0; width:84%; height:47px; bottom:38px; }.monitor-display { height:37px; border-width:3px; }.monitor-foot { height:8px; }.pc-tower { width:14%; height:30px; bottom:40px; }.pc-tower i { width:7px; height:7px; border-width:1px; }.game-hud { height:5px; padding:0; }.game-hud i { width:4px; height:4px; }.keyboard { height:6px; bottom:40px; }.mouse { bottom:40px; height:5px; width:5px; }.desk-top::after { box-shadow:55px 0 #263341; width:5px; }
  .room-poster { width:65px; height:85px; right:40%; bottom:31vh; }.room-poster span { font-size:10px; }.room-poster i { font-size:4px; }.room-shelf { left:13%; width:75px; bottom:39vh; }.story-page.cinematic-story .room-window { bottom:180px; right:8%; width:35%; height:24vh; }.story-page.cinematic-story .room-lamp { left:5%; bottom:30vh; width:40px; height:25px; }.story-page.cinematic-story .room-lamp::after { left:18px; }.room-status { top:52px; left:7%; right:auto; }
- .story-page.cinematic-story .scene-solo .comic-stage { left:20%; width:60%; }.story-page.cinematic-story .scene-solo .toon svg { width:85%; }
- .story-page.cinematic-story .comic-stage { left:25%; width:50%; bottom:125px; height:36vh; }.story-page.cinematic-story .toon svg { max-height:29vh; bottom:60px; }.story-page.cinematic-story .gaming-chair { height:26vh; }.story-page.cinematic-story .monitor { height:70px; }.story-page.cinematic-story .monitor-display { height:60px; }.story-page.cinematic-story .bubble { bottom:calc(60px + 29vh); }
+ .story-page.cinematic-story .scene-solo .comic-stage { left:0; width:100%; }.story-page.cinematic-story .scene-solo .toon svg { width:85%; }
+ .story-page.cinematic-story .comic-stage { left:0; width:100%; bottom:125px; height:36vh; }.story-page.cinematic-story .toon svg { max-height:29vh; bottom:60px; }.story-page.cinematic-story .gaming-chair { height:26vh; }.story-page.cinematic-story .monitor { height:70px; }.story-page.cinematic-story .monitor-display { height:60px; }.story-page.cinematic-story .bubble { bottom:calc(60px + 29vh); }
 }
 /* Complete, readable panels before scripting starts and when motion is reduced. */
 .story-page.cinematic-story:not(.motion-ready) .scene { min-height:100svh; }
@@ -207,7 +207,8 @@
  .story-page.cinematic-story .actor-portrait { width:min(100%,20.88vh); bottom:60px; }
  .story-page.cinematic-story .actor-portrait > .bubble,.story-page.cinematic-story [data-speaker="pipej"] .actor-portrait > .bubble,.story-page.cinematic-story [data-speaker="miki"] .actor-portrait > .bubble { font-size:11px; top:14%; bottom:auto; left:auto; right:82%; max-width:min(110px,27vw); }
  .story-page.cinematic-story [data-speaker="pipej"] .scene-content,.story-page.cinematic-story [data-speaker="miki"] .scene-content { margin-left:0; }
- .story-page.cinematic-story [data-speaker="pipej"] .comic-stage,.story-page.cinematic-story [data-speaker="miki"] .comic-stage { left:25%; }
+ .story-page.cinematic-story [data-speaker="pipej"] .comic-stage,.story-page.cinematic-story [data-speaker="miki"] .comic-stage { left:0; width:100%; }
+ .story-page.cinematic-story [data-speaker="pipej"] .comic-room,.story-page.cinematic-story [data-speaker="miki"] .comic-room { left:-3vw; right:-3vw; }
  .story-page.cinematic-story .scene-reunion .comic-stage { left:4%; width:92%; height:31vh; bottom:125px; }
  .story-page.cinematic-story .scene-reunion .actor-portrait { width:min(115%,17.28vh); }
  .story-page.cinematic-story .scene-reunion .gaming-chair { height:19vh; }
@@ -216,17 +217,18 @@
  .story-page.cinematic-story .scene-reunion .toon::before { font-size:5px; top:10px; }
 }
 
-.mobile-story-nav { display:none; }
+.mobile-story-nav { position:fixed; z-index:30; left:50%; bottom:24px; display:flex; align-items:center; gap:12px; padding:6px 7px 6px 14px; border:1px solid #e6bf7544; border-radius:999px; background:#101722ed; color:#eee3cb; box-shadow:0 6px 24px #0008; backdrop-filter:blur(12px); transform:translateX(-50%); }
+.mobile-story-nav__progress { min-width:4.5ch; color:#cfc4af; font:700 11px/1 Consolas,'Courier New',monospace; letter-spacing:.08em; text-align:center; }
+.mobile-story-nav button { display:flex; align-items:center; justify-content:center; gap:9px; min-height:44px; border:0; border-radius:999px; padding:0 16px; background:var(--gold); color:#101722; font:750 12px/1 system-ui,sans-serif; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; }
+.mobile-story-nav button[aria-disabled="true"] { opacity:.72; cursor:progress; }
+.mobile-story-nav button:focus-visible { outline:2px solid #fff; outline-offset:3px; }
+.mobile-story-nav button span[aria-hidden] { font-size:16px; }
 @media(max-width:700px) {
  /* One tap advances each panel; retain the longer ending for its scroll-driven reveal. */
  .story-page.cinematic-story .scene { min-height:100svh; }
  .story-page.cinematic-story.motion-ready .scene-reunion { min-height:155svh; }
  .story-page.cinematic-story .scene-index,.story-page.cinematic-story .scroll-cue { display:none; }
- .mobile-story-nav { position:fixed; z-index:30; left:50%; bottom:calc(12px + env(safe-area-inset-bottom, 0px)); display:flex; align-items:center; gap:12px; padding:6px 7px 6px 14px; border:1px solid #e6bf7544; border-radius:999px; background:#101722ed; color:#eee3cb; box-shadow:0 6px 24px #0008; backdrop-filter:blur(12px); transform:translateX(-50%); }
- .mobile-story-nav__progress { min-width:4.5ch; color:#cfc4af; font:700 11px/1 Consolas,'Courier New',monospace; letter-spacing:.08em; text-align:center; }
- .mobile-story-nav button { display:flex; align-items:center; justify-content:center; gap:9px; min-height:44px; border:0; border-radius:999px; padding:0 16px; background:var(--gold); color:#101722; font:750 12px/1 system-ui,sans-serif; letter-spacing:.07em; text-transform:uppercase; cursor:pointer; }
- .mobile-story-nav button:focus-visible { outline:2px solid #fff; outline-offset:3px; }
- .mobile-story-nav button span[aria-hidden] { font-size:16px; }
+ .mobile-story-nav { bottom:calc(12px + env(safe-area-inset-bottom, 0px)); }
 }
 
 
