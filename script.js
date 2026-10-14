@@ -3,6 +3,8 @@
   const scenes = [...document.querySelectorAll('.scene')];
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const clamp = n => Math.max(0, Math.min(1, n));
+  const sceneBoundaryTolerance = 1; // Absorb subpixel scroll rounding at scene starts.
+  const sceneTop = scene => scene.getBoundingClientRect().top + window.scrollY;
   const ease = n => { n = clamp(n); return n * n * (3 - 2 * n); };
   const rigs = scenes.map(scene => ({
     scene, panel: scene.querySelector('.panel-frame'),
@@ -33,7 +35,7 @@
   const mobileNext = mobileNav.querySelector('button');
   const mobileNextLabel = mobileNav.querySelector('.mobile-story-nav__label');
   const mobileNextIcon = mobileNext.querySelector('[aria-hidden="true"]');
-  const nextStepDuration = 1400; // Give each scene a deliberate transition.
+  const nextStepDuration = 5000; // Let each voice handoff unfold at a calmer pace.
   const finaleDuration = 7600; // Play the scroll-driven friendship reveal at a calm pace.
   let nextScroll = null;
   function cancelNextScroll(event) {
@@ -47,7 +49,7 @@
   function animateNextScroll(steps, targetIndex) {
     cancelNextScroll();
     const root = document.documentElement;
-    nextScroll = {frame:0, scrollBehavior:root.style.scrollBehavior, targetIndex};
+    nextScroll = {frame:0, scrollBehavior:root.style.scrollBehavior, targetIndex, skipTop:steps[steps.length - 1].top};
     const animation = nextScroll;
     root.style.scrollBehavior = 'auto';
     queue();
@@ -77,22 +79,26 @@
     addEventListener(type, cancelNextScroll, {passive:true})
   );
   mobileNext.addEventListener('click', () => {
+    const sceneTops = rigs.map(({scene}) => sceneTop(scene));
     let current = 0;
-    rigs.forEach(({scene}, index) => { if (scrollY >= scene.offsetTop) current = index; });
-    // Count an in-flight destination so another activation advances past it.
+    sceneTops.forEach((top, index) => { if (scrollY + sceneBoundaryTolerance >= top) current = index; });
+    // Fast-forward an in-flight scene advance to its destination.
     if (nextScroll) {
-      current = Math.max(current, nextScroll.targetIndex);
+      const {skipTop, targetIndex} = nextScroll;
       cancelNextScroll();
+      animateNextScroll([{top:skipTop, duration:320}], targetIndex);
+      return;
     }
     const lastIndex = rigs.length - 1;
     const lastScene = rigs[lastIndex].scene;
-    const finale = clamp((scrollY - lastScene.offsetTop) / Math.max(1, lastScene.offsetHeight - innerHeight));
+    const lastSceneTop = sceneTops[lastIndex];
+    const finale = clamp((scrollY - lastSceneTop) / Math.max(1, lastScene.offsetHeight - innerHeight));
     const atEnd = reduced.matches || finale >= .92;
     const endOfStory = document.documentElement.scrollHeight - innerHeight;
     let top;
     if (current < lastIndex) {
       const next = current + 1;
-      top = next === rigs.length - 1 ? endOfStory : rigs[next].scene.offsetTop;
+      top = next === rigs.length - 1 ? endOfStory : sceneTops[next] + sceneBoundaryTolerance;
     } else {
       top = atEnd ? 0 : endOfStory;
     }
@@ -102,7 +108,7 @@
     }
     const steps = current === lastIndex - 1
       ? [
-          {top:lastScene.offsetTop, duration:nextStepDuration},
+          {top:lastSceneTop + sceneBoundaryTolerance, duration:nextStepDuration},
           {top:endOfStory, duration:finaleDuration}
         ]
       : [{top, duration:current === lastIndex ? Math.max(1200, finaleDuration * (1 - finale)) : nextStepDuration}];
@@ -146,21 +152,22 @@
     queued = false;
     const quiet = reduced.matches;
     document.body.classList.toggle('motion-ready', !quiet);
+    const sceneTops = rigs.map(({scene}) => sceneTop(scene));
     let active = 0;
-    rigs.forEach(({scene}, index) => { if (scrollY >= scene.offsetTop) active = index; });
+    sceneTops.forEach((top, index) => { if (scrollY + sceneBoundaryTolerance >= top) active = index; });
     const scene = rigs[active].scene;
-    const travel = clamp((scrollY - scene.offsetTop) / scene.offsetHeight);
-    const finaleProgress = scene === reunion ? clamp((scrollY - scene.offsetTop) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
+    const travel = clamp((scrollY - sceneTops[active]) / scene.offsetHeight);
+    const finaleProgress = scene === reunion ? clamp((scrollY - sceneTops[active]) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
     const finaleComplete = reduced.matches || finaleProgress >= .92;
     mobileStep.textContent = String(active + 1).padStart(2, '0') + ' / ' + String(rigs.length).padStart(2, '0');
     const nextBusy = Boolean(nextScroll);
-    mobileNextLabel.textContent = nextBusy ? 'Počakajte' : scene === reunion ? (finaleComplete ? 'Na začetek' : 'Poglej finale') : 'Naprej';
+    mobileNextLabel.textContent = nextBusy ? 'Preskoči' : scene === reunion ? (finaleComplete ? 'Na začetek' : 'Poglej finale') : 'Naprej';
     mobileNextIcon.textContent = scene === reunion && finaleComplete ? '↑' : '↓';
     mobileNext.setAttribute('aria-busy', String(nextBusy));
     mobileNext.setAttribute('aria-label', mobileNextLabel.textContent + ', prizor ' + (active + 1) + ' od ' + rigs.length);
     const canCut = active < rigs.length - 1 && !quiet;
-    const outgoing = canCut ? 1 - ease((travel - .60) / .18) : 1;
-    const incoming = canCut ? ease((travel - .90) / .10) : 0;
+    const outgoing = canCut ? 1 - ease((travel - .15) / .47) : 1;
+    const incoming = canCut ? ease((travel - .84) / .16) : 0;
     const dark = canCut ? 1 - Math.max(outgoing, incoming) : 0;
     cut.style.opacity = dark;
     label.style.opacity = wave.style.opacity = ease((dark - .6) / .4);
@@ -170,7 +177,7 @@
       const opacity = index === active ? outgoing : index === active + 1 ? incoming : 0;
       const visible = quiet || opacity > .001;
       const ending = scene === reunion;
-      const finale = ending ? clamp((scrollY - scene.offsetTop) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
+      const finale = ending ? clamp((scrollY - sceneTops[index]) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
       if (ending) {
         const ignite = quiet ? 1 : ease((finale - .34) / .1);
         const settled = quiet ? 1 : ease((finale - .66) / .25);
