@@ -23,8 +23,32 @@
   const cut = document.createElement('div'); cut.className = 'call-cut'; cut.setAttribute('aria-hidden', 'true');
   cut.innerHTML = '<span class="call-wave"><i></i><i></i><i></i><i></i><i></i></span><span class="call-label"></span>';
   const progress = document.createElement('div'); progress.className = 'cinema-progress'; progress.setAttribute('aria-hidden', 'true');
-  document.body.append(cut, progress);
+  const mobileNav = document.createElement('nav');
+  mobileNav.className = 'mobile-story-nav';
+  mobileNav.setAttribute('aria-label', 'Pomikanje po zgodbi');
+  mobileNav.innerHTML = '<span class="mobile-story-nav__progress" aria-live="polite"></span><button type="button"><span class="mobile-story-nav__label"></span><span aria-hidden="true">↓</span></button>';
+  document.body.append(cut, progress, mobileNav);
   const label = cut.querySelector('.call-label'), wave = cut.querySelector('.call-wave');
+  const mobileStep = mobileNav.querySelector('.mobile-story-nav__progress');
+  const mobileNext = mobileNav.querySelector('button');
+  const mobileNextLabel = mobileNav.querySelector('.mobile-story-nav__label');
+  const mobileNextIcon = mobileNext.querySelector('[aria-hidden="true"]');
+  mobileNext.addEventListener('click', () => {
+    let current = 0;
+    rigs.forEach(({scene}, index) => { if (scrollY >= scene.offsetTop) current = index; });
+    const lastScene = rigs[rigs.length - 1].scene;
+    const finale = clamp((scrollY - lastScene.offsetTop) / Math.max(1, lastScene.offsetHeight - innerHeight));
+    const atEnd = reduced.matches || finale >= .92;
+    const endOfStory = document.documentElement.scrollHeight - innerHeight;
+    let top;
+    if (current < rigs.length - 1) {
+      const next = current + 1;
+      top = next === rigs.length - 1 ? endOfStory : rigs[next].scene.offsetTop;
+    } else {
+      top = atEnd ? 0 : endOfStory;
+    }
+    window.scrollTo({top, behavior:reduced.matches ? 'auto' : 'smooth'});
+  });
   const speakers = {bobo:'Bobo',pipej:'Pipej',miki:'Miki',kevin:'Kevin',unknown:'Jakinov slot',together:'Vsi skupaj'};
   const reunion = document.querySelector('.scene-reunion');
   const friendship = reunion.querySelector('.friendship');
@@ -67,6 +91,12 @@
     rigs.forEach(({scene}, index) => { if (scrollY >= scene.offsetTop) active = index; });
     const scene = rigs[active].scene;
     const travel = clamp((scrollY - scene.offsetTop) / scene.offsetHeight);
+    const finaleProgress = scene === reunion ? clamp((scrollY - scene.offsetTop) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
+    const finaleComplete = reduced.matches || finaleProgress >= .92;
+    mobileStep.textContent = String(active + 1).padStart(2, '0') + ' / ' + String(rigs.length).padStart(2, '0');
+    mobileNextLabel.textContent = scene === reunion ? (finaleComplete ? 'Na začetek' : 'Poglej finale') : 'Naprej';
+    mobileNextIcon.textContent = scene === reunion && finaleComplete ? '↑' : '↓';
+    mobileNext.setAttribute('aria-label', mobileNextLabel.textContent + ', prizor ' + (active + 1) + ' od ' + rigs.length);
     const canCut = active < rigs.length - 1 && !quiet;
     const outgoing = canCut ? 1 - ease((travel - .60) / .18) : 1;
     const incoming = canCut ? ease((travel - .90) / .10) : 0;
