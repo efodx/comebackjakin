@@ -40,6 +40,7 @@ main { overflow: clip; }
   font-size: .72rem;
 }
 .eyebrow { color: var(--gold); margin: 0 0 1.3rem; }
+.speaker { color: var(--gold); font-weight: 650; }
 h1, h2 { max-width: 780px; margin: 0; font-size: clamp(2.65rem, 6.2vw, 6.25rem); line-height: .98; letter-spacing: -.065em; font-weight: 600; text-wrap: balance; }
 h2 { font-size: clamp(2.35rem, 5.2vw, 5.35rem); }
 .caption { max-width: 570px; margin: 1.5rem 0 0; color: var(--muted); font-size: clamp(1rem, 1.55vw, 1.25rem); line-height: 1.65; }

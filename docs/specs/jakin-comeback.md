@@ -43,20 +43,42 @@ The experience contains no functional buttons, forms, invitations that trigger a
 
 - Start from an empty workspace. There is no existing application, Git repository, documentation convention, domain glossary, ADR, or testing infrastructure.
 - Use a dependency-free static website with semantic HTML, CSS, and only minimal JavaScript if needed to trigger progressive scroll reveals. No backend, database, API, account system, or application state is required.
-- Build one linear page containing six ordered scenes. Each scene combines readable captions with decorative CSS scenery and silhouettes.
+- Build one linear page containing six ordered scenes. Each scene combines readable captions, decorative CSS scenery, and recognizable flat cartoon characters with separate SVG groups for animation.
 - Scene 1: Bobo, Miki, Kevin, and Pipej wait in League voice. “Jakin pride čez pet minut” introduces the lateness joke. Bobo provides the teasing voice.
 - Scene 2: Pipej reminisces about happy shared games. Use warm golden lighting and generic shared-play imagery. Do not invent specific matches, champions, ranks, or historical anecdotes.
 - Scene 3: Jakin leaves the shared routine. Warmth fades into cold, quieter scenery; the transition remains affectionate rather than accusatory.
 - Scene 4: The four friends face an empty fifth slot. Miki admits they miss Jakin. The scene communicates that playing together mattered more than the result.
 - Scene 5: Jakin appears alone beside a quiet League voice motif. Brief exaggerated tragic captions make the imagined loneliness a joke, not a factual claim about him.
 - Scene 6: Hopeful lighting returns. Kevin delivers “Jakin, pridi nazaj. Lahko zamudiš. Samo pridi.” Display Bobo, Miki, Kevin, and Pipej as the senders. The invitation is static text.
-- Keep the final visual direction dark and cinematic, League-inspired, with glowing scenery, silhouettes, and a warm-to-cold-to-hopeful color progression.
+- Keep the final visual direction dark and cinematic, League-inspired, with glowing scenery, large illustrated characters, comic dialogue, and a warm-to-cold-to-hopeful color progression.
 - Give scroll animation a narrative purpose: reveal memories, expose absence, and restore warmth. Ordinary scrolling remains usable; avoid scroll hijacking or requiring precise gestures.
 - Treat animation as progressive enhancement. Captions and scene order remain readable when motion is reduced or animation scripting is unavailable.
 - Support mobile and desktop layouts with readable typography, responsive scenery, and no horizontal overflow. Respect reduced-motion preferences with a quiet presentation that preserves all story content.
-- Use only the agreed nicknames and the lateness detail as personal information. No portraits, private screenshots, or additional personal facts are required.
+- Keep project copy and character notes nickname-only; never store real names or profile URLs. Use user-confirmed reference images only to guide visible appearance and clothing details. Do not embed the reference photos in the public page or add unrelated biographical details.
 - Use a public repository named `comebackjakin` and public GitHub Pages hosting. Verify assets and navigation work under a project-site URL prefix.
 - The canonical specification location is the user-approved documentation convention. Do not create separate implementation task documents unless requested.
+
+## Character Appearance References
+
+These notes are based on reference portraits supplied or confirmed by the user. Keep the notes under nicknames only; the reference URLs and real names are intentionally omitted.
+
+- **Bobo:** Short dark hair with a smooth top and optional texture at the front, never spikes on top; a trimmed beard and mustache, a light gray hoodie, and dark backpack straps. The portrait has a friendly, slight smile.
+- **Miki:** Short dark hair with a smooth top, never spikes on top, and a clean-shaven face; wears a dark suit, white shirt, and red-burgundy tie in the portrait.
+- **Jakin:** Closely cropped light-brown hair and a short beard; wears a navy T-shirt and holds a light-colored mug in the portrait.
+- **Kevin:** Shoulder-length brown hair, glasses, and a short brown beard and mustache; wears a light T-shirt and casual trousers in a relaxed outdoor pose. Hair and beard color were explicitly clarified by the user after the initial black-and-white reference.
+- **Pipej:** Medium-length, full dark-brown hair with a loose side part; wears a dark casual top. The photo is a close, side-facing selfie, and facial hair is not clear enough to specify.
+
+## Character-led Prototype Direction
+
+- The user approved expressive illustrated versions of the friends, with recognizable hair, facial hair, glasses, and clothing from the appearance notes.
+- Explore a comic-book presentation with large recurring characters, expressions, and speech bubbles, while retaining cinematic atmosphere and transitions during ordinary scrolling. Preserve the six-scene story and warm-to-cold-to-hopeful progression.
+- Bobo constantly teases affectionately. Miki's humor should be subtle, expressed through mild exasperation or dry remarks; the page will also be seen by Miki, so avoid explicit labels or humiliating jokes.
+- First explore the direction through a preview-only image mockup in the conversation. The mockup shows selected scenes; it does not validate scroll behavior or replace the six-scene implementation.
+- The user rejected the image mockup as far too realistic and requested prototyping directly on the actual page. Explore flat cartoon characters with bold outlines and exaggerated proportions instead.
+- Local prototype: `http://127.0.0.1:4173/?prototype=1&variant=A` on branch `codex/cartoon-prototype`. `prototype.js` and `prototype.css` provide three layouts on the existing page: A comic panels, B wide cinematic frames, and C narration beside the characters. The bottom switcher is local prototype tooling. All six scenes remain available; a layout has not yet been selected.
+- The user selected variant A for continued prototyping and requested animated characters and smooth cinematic panel transitions. Characters now have separate SVG head, body, clothing, arm, and prop groups. Variant A explores sticky panel holds, a slow camera push, background parallax, staggered character entrances, scroll-driven head and arm gestures, and Jakin lifting his mug. Movement follows scroll in both directions; reduced-motion uses static panels and characters.
+- The user approved implementation of variant A with the corrected smooth hair silhouettes and shoulder-pivoted arms. The selected layout is now the default page, with static SVG character markup in `index.html`, styles in `story.css`, and progressive scroll animation in `script.js`. Prototype controls and localhost gates are removed. The original variants are preserved at commit `72753a6` on `codex/cartoon-prototype`; implementation continues on `codex/character-story`.
+- Implementation validation: the normal local URL renders six scenes and 23 character instances with no interactive controls. Desktop scroll changes head and arm transforms while the active panel holds. Mobile rendering has no horizontal overflow and the ending remains visible. Temporary browser fixtures verified all characters and captions without JavaScript, and forced reduced-motion CSS and script branches produced static heads, visible bubbles, and unpinned panels. JavaScript syntax and whitespace checks pass. These checks do not establish deployment to GitHub Pages.
 
 ## Testing Decisions
 
