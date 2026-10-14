@@ -1,6 +1,6 @@
 # Jakin, pridi nazaj
 
-A tiny, dependency-free illustrated story page for Bobo, Miki, Kevin, Pipej, and Jakin. Six comic panels move from a familiar League voice lobby through an empty slot and back to a warm invitation. Scrolling drives gentle character gestures, camera movement, and panel transitions; reduced-motion preferences show static panels.
+A dependency-free cinematic story for Bobo, Miki, Kevin, Pipej, and Jakin. Seven scenes cut between friends on League voice, move through the empty fifth slot and Kevin's invitation, and end with the hoped-for reunion. Scrolling drives character gestures, camera movement, and extended voice transitions. Reduced-motion preferences and browsers without JavaScript show complete static panels.
 
 ## Run locally
 
@@ -12,8 +12,9 @@ The repository is configured to publish the root directory with GitHub Pages thr
 
 ## Contents
 
-- `index.html` — the six-scene Slovenian story and SVG character rigs, complete without JavaScript.
+- `index.html` — the seven-scene Slovenian story, gaming rooms, and SVG character rigs, complete without JavaScript.
 - `styles.css` — base typography and cinematic scenery.
 - `story.css` — responsive comic panels, character styling, and reduced-motion presentation.
-- `script.js` — optional scroll-driven panel and character animation.
+- `cinematic.css` — the selected character close-ups, gaming setups, speech bubbles, reunion montage, and static fallbacks.
+- `script.js` — optional voice-call cuts, character gestures, and speech-tail positioning.
 - `docs/specs/jakin-comeback.md` — the agreed project specification.
