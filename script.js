@@ -26,6 +26,38 @@
   document.body.append(cut, progress);
   const label = cut.querySelector('.call-label'), wave = cut.querySelector('.call-wave');
   const speakers = {bobo:'Bobo',pipej:'Pipej',miki:'Miki',kevin:'Kevin',unknown:'Jakinov slot',together:'Vsi skupaj'};
+  const reunion = document.querySelector('.scene-reunion');
+  const friendship = reunion.querySelector('.friendship');
+  const letters = [...friendship.children];
+  const cup = reunion.querySelector('.toon-jakin .mug-grip');
+  const confetti = document.createElement('div');
+  confetti.className = 'friendship-confetti';
+  confetti.setAttribute('aria-hidden', 'true');
+  const sparks = Array.from({length:72}, () => confetti.appendChild(document.createElement('b')));
+  friendship.after(confetti);
+  const magic = document.createElement('div');
+  magic.className = 'cup-magic';
+  magic.setAttribute('aria-hidden', 'true');
+  magic.innerHTML = '<div class="magic-aura"></div><div class="magic-ring"></div><div class="magic-ring magic-ring-cross"></div><div class="magic-orbit"><i>✦</i><i>✧</i><i>✦</i><i>✧</i></div><div class="magic-steam"><i></i><i></i><i></i></div>';
+  confetti.after(magic);
+  const keepsakes = document.createElement('div');
+  keepsakes.className = 'party-keepsakes';
+  keepsakes.setAttribute('aria-hidden', 'true');
+  const treasures = Array.from({length:24}, (_, i) => {
+    const artifact = document.createElement('span');
+    artifact.innerHTML = '<i>' + ['✦', '♥', '✧', '♪', '◆', '★'][i % 6] + '</i>';
+    artifact.style.setProperty('--artifact-delay', -(i % 7) * .6 + 's');
+    return keepsakes.appendChild(artifact);
+  });
+  magic.after(keepsakes);
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const cupDefs = document.createElementNS(svgNS, 'defs');
+  cupDefs.innerHTML = '<linearGradient id="friendship-cup-enamel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffe49b"/><stop offset=".35" stop-color="#ff98cb"/><stop offset=".7" stop-color="#bd9dff"/><stop offset="1" stop-color="#80edeb"/></linearGradient>';
+  cup.ownerSVGElement.prepend(cupDefs);
+  const cupEmblem = document.createElementNS(svgNS, 'path');
+  cupEmblem.setAttribute('d', 'M100 204 C97 201 92 198 92 194 C92 189 98 188 100 192 C102 188 108 189 108 194 C108 198 103 201 100 204Z');
+  cupEmblem.setAttribute('class', 'cup-emblem');
+  cup.firstElementChild.after(cupEmblem);
   let queued = false;
   function draw() {
     queued = false;
@@ -46,6 +78,18 @@
     rigs.forEach(({scene, panel, actors}, index) => {
       const opacity = index === active ? outgoing : index === active + 1 ? incoming : 0;
       const visible = quiet || opacity > .001;
+      const ending = scene === reunion;
+      const finale = ending ? clamp((scrollY - scene.offsetTop) / Math.max(1, scene.offsetHeight - innerHeight)) : 0;
+      if (ending) {
+        const ignite = quiet ? 1 : ease((finale - .34) / .1);
+        const settled = quiet ? 1 : ease((finale - .66) / .25);
+        // Hand the focus back to Jakin as the last letters find their places.
+        panel.style.setProperty('--cup-magic', ignite * (1 - settled * .94));
+        panel.style.setProperty('--cup-glow', ignite * (1 - settled * .88));
+        panel.style.setProperty('--cup-aura-scale', 1 - settled * .32);
+        panel.style.setProperty('--cup-emblem', ignite);
+        panel.classList.toggle('cup-enchanted', quiet || finale > .34);
+      }
       scene.classList.toggle('cinema-active', visible);
       panel.style.setProperty('--cinema-opacity', quiet ? 1 : opacity);
       panel.style.setProperty('--camera-scale', quiet ? 1 : 1 + (index === active ? travel : 0) * .055);
@@ -57,7 +101,7 @@
         const sign = actorIndex % 2 ? -1 : 1;
         actor.style.setProperty('--head-turn', phase * sign * (energy ? 10 : 5) + 'deg');
         actor.style.setProperty('--arm-turn', phase * sign * (energy ? 22 : 9) + 'deg');
-        actor.style.setProperty('--mug-lift-angle', phase * 65 + 'deg');
+        actor.style.setProperty('--mug-lift-angle', (ending ? (quiet ? 95 : -55 + ease(finale / .4) * 150) : phase * 65) + 'deg');
         if (!bubble || quiet) return;
         const bounds = portrait.getBoundingClientRect(), speech = bubble.getBoundingClientRect();
         if (!bounds.width || !bounds.height) return;
@@ -68,6 +112,52 @@
         const tipX = left ? 42 : 138;
         tail.firstElementChild.setAttribute('d', 'M' + (startX - 4) + ' ' + startY + ' Q' + (startX - 2) + ' ' + (startY + 12) + ' ' + tipX + ' 112 Q' + (startX + 6) + ' ' + (startY + 10) + ' ' + (startX + 4) + ' ' + startY);
       });
+      if (ending && !quiet) {
+        // Measure the transformed cup so the letters emerge from its actual rim,
+        // including the camera scale and responsive character sizing.
+        const frame = panel.getBoundingClientRect(), rim = cup.getBoundingClientRect();
+        const heads = actors.map(({portrait}) => portrait.getBoundingClientRect().top);
+        const center = frame.width / 2;
+        const spacing = Math.min(96, frame.width * .089);
+        const originX = rim.left + rim.width * .3 - frame.left;
+        const originY = rim.top + 3 - frame.top;
+        const wordY = Math.max(frame.height * .35, Math.min(...heads) - frame.top - 74);
+        magic.style.left = originX + 'px';
+        magic.style.top = originY + rim.height * .3 + 'px';
+        magic.style.setProperty('--magic-size', Math.max(60, rim.width * 2.6) + 'px');
+        friendship.style.setProperty('--word-y', wordY + 'px');
+        friendship.style.setProperty('--celebration', ease((finale - .43) / .3));
+        letters.forEach((letter, i) => {
+          const flight = clamp((finale - .43 - i * .026) / .24);
+          const arrive = ease(flight);
+          const targetX = center + (i - (letters.length - 1) / 2) * spacing;
+          const targetY = wordY - Math.sin(i / (letters.length - 1) * Math.PI) * 30;
+          const flourish = Math.sin(flight * Math.PI);
+          letter.style.left = originX + (targetX - originX) * arrive + Math.sin(flight * Math.PI * 2) * (i % 2 ? -24 : 24) + 'px';
+          letter.style.top = originY + (targetY - originY) * arrive - flourish * Math.min(110, frame.height * .13) + 'px';
+          letter.style.opacity = ease(flight / .18);
+          letter.style.setProperty('--letter-scale', .15 + arrive * .85 + Math.sin(flight * Math.PI) * .55);
+          letter.style.setProperty('--letter-rotation', (i % 2 ? -1 : 1) * (1 - arrive) * 150 + 'deg');
+        });
+        sparks.forEach((spark, i) => {
+          // Staggered fountains of stars and confetti follow the same scroll timeline.
+          const flight = clamp((finale - .42 - (i % 9) * .027) / .34);
+          const spread = Math.sin(i * 2.4) * Math.min(frame.width * .43, 520);
+          spark.style.left = originX + spread * ease(flight) + 'px';
+          spark.style.top = originY - Math.sin(flight * Math.PI * .78) * (100 + (i % 5) * 35) - flight * 65 + 'px';
+          spark.style.opacity = Math.sin(flight * Math.PI) * .9;
+          spark.style.transform = 'translate(-50%,-50%) rotate(' + (i * 37 + flight * 400) + 'deg) scale(' + (.4 + Math.sin(flight * Math.PI) * .8) + ')';
+        });
+        treasures.forEach((artifact, i) => {
+          const flight = ease((finale - .46 - (i % 8) * .025) / .3);
+          const targetX = center + ((i % 12) / 11 - .5) * Math.min(frame.width * .88, 1080);
+          const targetY = wordY + (i < 12 ? -1 : 1) * (58 + (i % 3) * 16);
+          artifact.style.left = originX + (targetX - originX) * flight + 'px';
+          artifact.style.top = originY + (targetY - originY) * flight - Math.sin(flight * Math.PI) * 55 + 'px';
+          artifact.style.opacity = flight * (i % 3 === 0 ? .9 : .65);
+          artifact.style.transform = 'translate(-50%,-50%) scale(' + (.2 + flight * .8) + ')';
+        });
+      }
     });
     progress.style.setProperty('--story-progress', clamp(scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)));
   }
